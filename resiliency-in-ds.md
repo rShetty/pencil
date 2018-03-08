@@ -89,10 +89,20 @@ Writing less code means less reasons for your system to fail.
 
 _Stop waiting for an answer_
 
-The default Go http client has no HTTP timeout. This causes your application to leak goroutines. To avoid this problem, it is important that we add timeouts for every integration point in your application.
+The default Go http client has no HTTP timeout. This causes your application to leak goroutines. To avoid this problem, it is important that we add timeouts for every http integration point in your application.
 
-By doing this, you are...
-1. Preventing cascading failures
+Timeouts in application can help in following ways:
+
+1. Preventing cascading failures 
+
+Cascading failures are failures which propogate very quickly to other
+parts of your system. These are very bad if unmanaged. 
+
+Timeouts help us prevent these failures by failing fast. When downstream
+services fail or are slower (violating their SLA), instead of waiting for
+the answer forever, you fail early to save your system as well as the
+systems which are dependent on yours.
+
 2. Providing failure isolation
 3. Failing fast
 
