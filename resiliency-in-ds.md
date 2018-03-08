@@ -82,18 +82,23 @@ going ahead:
 
 Write Nothing and Deploy nowhere - Kelsey Hightower
 
-Though being sarcastic, this pattern has a important message in it.
-Writing less code means less reasons for your system to fail.
+The takeaway being:
+
+`Writing less code means less reasons for your system to fail`
 
 ### Pattern 1: Timeouts
 
 _Stop waiting for an answer_
 
-The default Go http client has no HTTP timeout. This causes your application to leak goroutines. To avoid this problem, it is important that we add timeouts for every http integration point in your application.
+The default Go http client has no HTTP timeout. This causes your
+application to leak goroutines. When you have a slow/failed downstream
+service, the go routine waits forever for the reply from downstream
+service. To avoid this problem, it is important that we add timeouts for
+every http integration point in your application.
 
 Timeouts in application can help in following ways:
 
-1. Preventing cascading failures 
+#### 1. Preventing cascading failures 
 
 Cascading failures are failures which propogate very quickly to other
 parts of your system. These are very bad if unmanaged. 
@@ -103,10 +108,17 @@ services fail or are slower (violating their SLA), instead of waiting for
 the answer forever, you fail early to save your system as well as the
 systems which are dependent on yours.
 
-2. Providing failure isolation
-3. Failing fast
+#### 2. Providing failure isolation
 
-Timeouts must be based on the SLAs provided by your dependencies
+Failure isolation is the concept of isolating failures to only some part
+of a system or a sub system.
+
+Timeouts allow you to have failure isolation by not making some other
+systems problem as your problem.
+
+### How should timeouts be set ?  
+
+Timeouts must be based on the SLAs provided by your dependencies. 
 
 ### Pattern 2: Retries
 
