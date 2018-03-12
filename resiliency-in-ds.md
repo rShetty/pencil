@@ -107,6 +107,17 @@ service, the go routine waits forever for the reply from downstream
 service. To avoid this problem, it is important that we add timeouts for
 every http integration point in our application.
 
+For example: you can set timeout using
+[Heimdall](https://github.com/gojektech/heimdall/) like:
+
+```go 
+    httpClient := heimdall.NewHTTPClient(1 * time.Millisecond) 
+    _, err := httpClient.Get("https://gojek.com/drivers", http.Header{})
+```
+
+This will help you fail fast if the downstream service does not reply back
+within 1ms.
+
 Timeouts in application can help in following ways:
 
 #### Preventing cascading failures 
@@ -138,6 +149,20 @@ _If you fail once, try again_
 
 Retries can help reduce recovery time. They are very effective when
 dealing with intermittent failures.
+
+For ex: You can do retries with constant backoff using 
+[Heimdall](https://github.com/gojektech/heimdall/) like:
+
+```go
+    backoff := heimdall.NewConstantBackoff(500)
+    retrier := heimdall.NewRetrier(backoff)
+    httpClient := heimdall.NewHTTPClient(1 * time.Millisecond)
+    
+    httpClient.SetRetrier(retrier)
+    httpClient.SetRetryCount(3)
+    
+    httpClient.Get("https://gojek.com/drivers", http.Header{})
+```
 
 Retries works well in conjunction with timeouts, when you timeout you
 retry the request.
@@ -226,10 +251,29 @@ open` state. If the next request in this state is successful, it goes to
 
 `Hystrix` by Netflix is a popular implementation of this pattern.
 
-#### Code in Go
+You can setup a simple hystrix Circuit breaker using 
+[Heimdall](https://github.com/gojektech/heimdall/) like:
 
-Circuit breaks are required at integration points, help preventing
-cascading failures allowing the failing service to recover.
+```go
+    config := heimdall.HystrixCommandConfig{
+                            MaxConcurrentRequests:  100,
+                            ErrorPercentThreshold:  25,
+                            SleepWindow:            10,
+                            RequestVolumeThreshold: 10,
+    }
+    
+    hystrixConfig := heimdall.NewHystrixConfig("MyCommand", config)
+    
+    timeout := 10 * time.Millisecond
+    httpClient := heimdall.NewHystrixHTTPClient(timeout, hystrixConfig)
+    
+    _, err := httpClient.Get("https://gojek.com/drivers", http.Header{})
+```
+
+The above code sets up a hystrix circuit breaker with timeout of 10ms allowing 100 max concurrent requests, with error percent of 25% and sleep window of 10ms.
+
+Circuit breakers are required at integration points, help preventing cascading
+failures allowing the failing service to recover.
 
 You also need good metrics/monitoring around this to detect various state
 transitions across various integration points. Hystrix has dashboards
@@ -254,9 +298,10 @@ purposefully to test resiliency. These kind of failures help us exercise
 a lot of unknown unknowns in our architecture.
 
 Netflix has championed this approach with tools like Chaos Monkey, Latency
-monkey etc which are part of Simian Army suite of applications.
+monkey etc which are part of [Simian
+Army](https://github.com/Netflix/SimianArmy) suite of applications.
 
-### Conclusion: 
+### In Conclusion: 
 
 Though following some of these patterns will help you acheive resiliency,
 these are no silver bullet. Systems do fail, and the sad truth is we have
@@ -265,8 +310,13 @@ uptime on the services.
 
 Important aspect being we have to `Design our systems for failure`
 
-
-We have open sourced [[Heimdall - Enhanced HTTP client in
-GO](https://github.com/gojektech/heimdall/)]  which helps us implement
+We have open sourced [Heimdall - Enhanced HTTP client in
+GO](https://github.com/gojektech/heimdall/)  which helps us implement
 some of these patterns in a single place.
 
+Would recommend reading [Release
+It](https://pragprog.com/book/mnee/release-it) by Michael Nygard.
+
+This blog post is inspired from the talk I gave on the same topic at Gophercon
+India 2018, the slides for which can be found
+[here](https://slides.com/rajeevbharshetty/resiliency-in-distributed-systems)
