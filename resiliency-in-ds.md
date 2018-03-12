@@ -309,7 +309,7 @@ these are no silver bullet. Systems do fail, and the sad truth is we have
 to deal with these failures. These patterns if excercised can help us
 achieve significant uptime on services. 
 
-We have `Design our systems for failure`.
+We have to `Design our systems for failure`.
 
 #### References:
 
