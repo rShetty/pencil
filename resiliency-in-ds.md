@@ -31,7 +31,13 @@ Some common examples of fault in our systems include:
 5. Bad data propogating in the system (Most often because of not enough
    validations for input data)
 
-< Diagram >
+Systems all healthy in absence of faults:
+
+<p align="center"><img src="img/healthy.png" width="360"></p>
+
+Systems affected in the presence of faults:
+
+<p align="center"><img src="img/fault.png" width="360"></p>
 
 #### Failure
 
@@ -40,9 +46,12 @@ means loss of uptime and availability on systems.
 
 Faults if not contained from propogating can lead to failures.
 
-Also, `Resiliency is all about preventing faults turning into failures`
+All systems failing when fault in one system turned into failures across
+systems:
 
-< Diagram >
+<p align="center"><img src="img/fault.png" width="360"></p>
+
+So we can quite confidently say that, `Resiliency is all about preventing faults turning into failures`
 
 ### Why do we care about resiliency in our systems ?
 
