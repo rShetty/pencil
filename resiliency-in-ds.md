@@ -46,8 +46,7 @@ means loss of uptime and availability on systems.
 
 Faults if not contained from propogating can lead to failures.
 
-All systems failing when fault in one system turned into failures across
-systems:
+Systems failing when fault turned into failure:
 
 <p align="center"><img src="img/failure.png" width="480"></p>
 
@@ -65,7 +64,7 @@ going down can have this impact:
 1. It can lead to financial losses for the company
 2. Losing customers to your competitors
 3. Affecting livelihood of drivers 
-4. Affecting livelihood of your customers
+4. Affecting livelihood of customers
 
 ### Resiliency in distributed systems is hard
 
@@ -102,10 +101,11 @@ going ahead:
 _Stop waiting for an answer_
 
 The default Go http client has no HTTP timeout. This causes your
-application to leak goroutines. When you have a slow/failed downstream
-service, the go routine waits forever for the reply from downstream
-service. To avoid this problem, it is important that we add timeouts for
-every http integration point in our application.
+application to leak goroutines (Because for every request Golang spawns
+a go-routine). When you have a slow/failed downstream service, the go
+routine waits forever for the reply from downstream service. To avoid this
+problem, it is important that we add timeouts for every http integration
+point in our application.
 
 For example: you can set timeout using
 [Heimdall](https://github.com/gojektech/heimdall/) like:
@@ -230,12 +230,13 @@ It is important to think of fallbacks at all of your integration points.
 
 _Trip the circuit to protect your dependencies_
 
-Circuit breakers are used in household to prevent sudden surge in current
-burning down your house. These trip their circuit and stop current from
-flowing. 
+Circuit breakers are used in households to prevent sudden surge in current
+preventing your house from burning down. These trip the circuit and stop
+flow of current. 
 
 This same concept could be applied to our systems wherein you stop making
-calls to downstream services when you know that the system is failing. 
+calls to downstream services when you know that the system is unhealthy
+and failing. 
 
 The state transitions on a typical circuit breaker(CB) looks like this:
 
@@ -305,18 +306,20 @@ Army](https://github.com/Netflix/SimianArmy) suite of applications.
 
 Though following some of these patterns will help you acheive resiliency,
 these are no silver bullet. Systems do fail, and the sad truth is we have
-to deal with these failures. These patterns help acheive significant
-uptime on the services. 
+to deal with these failures. These patterns if excercised can help us
+achieve significant uptime on services. 
 
-Important aspect being we have to `Design our systems for failure`
+We have `Design our systems for failure`.
 
-We have open sourced [Heimdall - Enhanced HTTP client in
-GO](https://github.com/gojektech/heimdall/)  which helps us implement
-some of these patterns in a single place.
+#### References:
 
-Would recommend reading [Release
-It](https://pragprog.com/book/mnee/release-it) by Michael Nygard.
+- We have open sourced [Heimdall - Enhanced HTTP client in
+  GO](https://github.com/gojektech/heimdall/) which helps us implement
+  some of these patterns in a single place.
 
-This blog post is inspired from the talk I gave on the same topic at Gophercon
-India 2018, the slides for which can be found
-[here](https://slides.com/rajeevbharshetty/resiliency-in-distributed-systems)
+ - Would recommend reading [Release
+   It](https://pragprog.com/book/mnee/release-it) by Michael Nygard.
+
+ - This blog post is inspired from the talk I gave on the same topic at
+   Gophercon India 2018, the slides for which can be found
+   [here](https://slides.com/rajeevbharshetty/resiliency-in-distributed-systems)
