@@ -33,11 +33,11 @@ Some common examples of fault in our systems include:
 
 Systems all healthy in absence of faults:
 
-<p align="center"><img src="img/healthy.png" width="360"></p>
+<p align="center"><img src="img/healthy.png" width="480"></p>
 
 Systems affected in the presence of faults:
 
-<p align="center"><img src="img/fault.png" width="360"></p>
+<p align="center"><img src="img/fault.png" width="480"></p>
 
 #### Failure
 
@@ -49,7 +49,7 @@ Faults if not contained from propogating can lead to failures.
 All systems failing when fault in one system turned into failures across
 systems:
 
-<p align="center"><img src="img/fault.png" width="360"></p>
+<p align="center"><img src="img/fault.png" width="480"></p>
 
 So we can quite confidently say that, `Resiliency is all about preventing faults turning into failures`
 
@@ -66,7 +66,6 @@ going down can have this impact:
 2. Losing customers to your competitors
 3. Affecting livelihood of drivers 
 4. Affecting livelihood of your customers
-5. Bad publicity
 
 ### Resiliency in distributed systems is hard
 
@@ -91,6 +90,8 @@ going ahead:
 
 `The best way to write reliable and secure applications is write no code
  at all - Write Nothing and Deploy nowhere` - Kelsey Hightower
+
+<p align="center"><img src="img/nocode.png" width="480"></p>
 
  The most resilient piece of code you ever write will be the code you
  never wrote. The lesser the code you write, lower are the reasons for
@@ -187,9 +188,13 @@ system was not fault tolerant against these slight increase in latencies.
 This is how the route path looks like when systems are operating as
 expected.
 
+<p align="center"><img src="img/route.jpg" width="480"></p>
+
 The solution we went with was to fallback to a route approximation for
 routing. When this fallback kicks in, systems dependending on maps
 services work in a degraded mode and the route on the map looks like this:
+
+<p align="center"><img src="img/fallback.jpg" width="480"></p>
 
 Fallbacks in the above scenario helped us prevent catastrophic failure
 wherein the whole of booking creation used to fail.
@@ -209,6 +214,7 @@ calls to downstream services when you know that the system is failing.
 
 The state transitions on a typical circuit breaker(CB) looks like this:
 
+<p align="center"><img src="img/cb.png" width="480"></p>
 
 Initially when systems are healthy, the CB is in `closed` state. In this
 state, it makes calls to downstream services. When certain number of
@@ -229,7 +235,7 @@ You also need good metrics/monitoring around this to detect various state
 transitions across various integration points. Hystrix has dashboards
 which helps you visualise state transitions.
 
-<Hystrix dashboard>
+<p align="center"><img src="img/dashboard.png" width="480"></p>
 
 ### Pattern 5: Resiliency Testing
 
@@ -260,6 +266,7 @@ uptime on the services.
 Important aspect being we have to `Design our systems for failure`
 
 
-We have open sourced `Heimdall` - Enhanced HTTP client in GO which helps
-us implement some of these patterns in a single place.
+We have open sourced [[Heimdall - Enhanced HTTP client in
+GO](https://github.com/gojektech/heimdall/)]  which helps us implement
+some of these patterns in a single place.
 
