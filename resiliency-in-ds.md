@@ -250,3 +250,7 @@ uptime on the services.
 
 Important aspect being we have to `Design our systems for failure`
 
+
+We have open sourced `Heimdall` - Enhanced HTTP client in GO which helps
+us implement some of these patterns in a single place.
+
