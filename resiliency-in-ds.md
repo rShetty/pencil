@@ -191,32 +191,62 @@ It is important to think of fallbacks at all of your integration points.
 
 _Trip the circuit to protect your dependencies_
 
+Circuit breakers are used in household to prevent sudden surge in current
+burning down your house. These trip their circuit and stop current from
+flowing. 
+
+This same concept could be applied to our systems wherein you stop making
+calls to downstream services when you know that the system is failing. 
+
+The state transitions on a typical circuit breaker(CB) looks like this:
 
 
-By doing this, you are...
-1. Preventing cascading failures
+Initially when systems are healthy, the CB is in `closed` state. In this
+state, it makes calls to downstream services. When certain number of
+requests fail, the CB trips the circuit and goes into `open` state. In
+this state, CB stops making any requests to failing downstream service.
+After a certain `sleep threshold`, CB attempts reset by  going into `half
+open` state. If the next request in this state is successful, it goes to
+`open` state. If this call fails, it stays in `open` state.
 
-Hystrix is a circuit breaker implementation by Netflix.
+`Hystrix` by Netflix is a popular implementation of this pattern.
 
+#### Code in Go
 
-### Pattern 5: Testing
+Circuit breaks are required at integration points, help preventing
+cascading failures allowing the failing service to recover.
 
-Resiliency testing.
+You also need good metrics/monitoring around this to detect various state
+transitions across various integration points. Hystrix has dashboards
+which helps you visualise state transitions.
 
-_Find failure modes_
+<Hystrix dashboard>
 
-1. Create a test harness to break callers
-2. Simulate failure modes
-3. Inject failures [Chaos Monkey, Latency monkeys, the entire Simian
-   Army
+### Pattern 5: Resiliency Testing
 
-Conclusion: 
+_Test to Break_
+
+It is important to simulate various failure conditions within your system.
+For example: Simulating various kinds of network failures, latencies in
+network, dependencies being slow or dead etc. After determining various
+failure modes, you codify it by creating some kind of test harness around
+it. These tests help you exercise some failure modes on every change to
+code.
+
+#### Injecting failures
+Injecting failures into your system is a technique to induce faults
+purposefully to test resiliency. These kind of failures help us exercise
+a lot of unknown unknowns in our architecture.
+
+Netflix has championed this approach with tools like Chaos Monkey, Latency
+monkey etc which are part of Simian Army suite of applications.
+
+### Conclusion: 
 
 Though following some of these patterns will help you acheive resiliency,
-these are no silver bullet. Systems do fail, it is important to keep the
-impact of these failures have on your users to minimal and these patterns
-help you acheive those.
+these are no silver bullet. Systems do fail, and the sad truth is we have
+to deal with these failures. These patterns help acheive significant
+uptime on the services. 
 
-`Design the system keeping failure in mind`
+Important aspect being we have to `Design our systems for failure`
 
-`Design for failure`
