@@ -49,7 +49,7 @@ Faults if not contained from propogating can lead to failures.
 All systems failing when fault in one system turned into failures across
 systems:
 
-<p align="center"><img src="img/fault.png" width="480"></p>
+<p align="center"><img src="img/failure.png" width="480"></p>
 
 So we can quite confidently say that, `Resiliency is all about preventing faults turning into failures`
 
