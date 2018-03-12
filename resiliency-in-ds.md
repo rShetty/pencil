@@ -138,7 +138,7 @@ of a system or a sub system.
 Timeouts allow you to have failure isolation by not making some other
 systems problem your problem.
 
-### How should timeouts be set ?  
+#### How should timeouts be set ?  
 
 Timeouts must be based on the SLAs provided by your dependencies. For
 example, this could be around the dependency's 99.9th percentile. 
