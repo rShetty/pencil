@@ -117,7 +117,6 @@ For example: you can set timeout using
 
 This will help you fail fast if the downstream service does not reply back
 within 1ms.
-
 Timeouts in application can help in following ways:
 
 #### Preventing cascading failures 
