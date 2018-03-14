@@ -81,7 +81,7 @@ Some of the things which make this hard are:
 Though building resiliency is hard, it is not impossible. Following some
 of the patterns while building distributed systems can help us acheive
 high uptime across our services. We will discuss some of these patterns
-going ahead:
+going forward:
 
 ### Pattern[0] = nocode
 
@@ -104,6 +104,8 @@ a go-routine). When you have a slow/failed downstream service, the go
 routine waits forever for the reply from downstream service. To avoid this
 problem, it is important that we add timeouts for every integration
 point in our application.
+
+Note: Heimdall is a GO-JEK OSS which implements some of the following resilient patterns.
 
 For example: you can set timeout using
 [Heimdall](https://github.com/gojektech/heimdall/) like:
@@ -215,7 +217,7 @@ expected.
 
 The solution we went with was to fallback to a route approximation for
 routing. When this fallback kicks in, systems dependending on maps
-services work in a degraded mode and the route on the map looks like this:
+services work in a degraded mode and the route on the map looks something like this:
 
 <p align="center"><img src="img/fallback.jpg" width="480"></p>
 
@@ -229,12 +231,12 @@ It is important to think of fallbacks at all of your integration points.
 _Trip the circuit to protect your dependencies_
 
 Circuit breakers are used in households to prevent sudden surge in current
-preventing your house from burning down. These trip the circuit and stop
+preventing house from burning down. These trip the circuit and stop
 flow of current. 
 
-This same concept could be applied to our systems wherein you stop making
+This same concept could be applied to our distributed systems wherein you stop making
 calls to downstream services when you know that the system is unhealthy
-and failing. 
+and failing and allow it to recover.
 
 The state transitions on a typical circuit breaker(CB) looks like this:
 
@@ -243,14 +245,14 @@ The state transitions on a typical circuit breaker(CB) looks like this:
 Initially when systems are healthy, the CB is in `closed` state. In this
 state, it makes calls to downstream services. When certain number of
 requests fail, the CB trips the circuit and goes into `open` state. In
-this state, CB stops making any requests to failing downstream service.
+this state, CB stops making requests to failing downstream service.
 After a certain `sleep threshold`, CB attempts reset by  going into `half
 open` state. If the next request in this state is successful, it goes to
 `open` state. If this call fails, it stays in `open` state.
 
 `Hystrix` by Netflix is a popular implementation of this pattern.
 
-You can setup a simple hystrix Circuit breaker using 
+You can setup a simple hystrix Circuit breaker at your integration point using 
 [Heimdall](https://github.com/gojektech/heimdall/) like:
 
 ```go
@@ -294,7 +296,7 @@ code.
 #### Injecting failures
 Injecting failures into your system is a technique to induce faults
 purposefully to test resiliency. These kind of failures help us exercise
-a lot of unknown unknowns in our architecture.
+a lot of unknown unknowns in our architectures.
 
 Netflix has championed this approach with tools like Chaos Monkey, Latency
 monkey etc which are part of [Simian
