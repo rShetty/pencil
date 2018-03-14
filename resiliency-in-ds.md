@@ -19,7 +19,7 @@ passing messages most often to achieve a common goal.
 
 Probability that any system is operating at time `t`.
 
-#### Fault
+### Faults vs Failures
 
 Fault is an incorrect internal state in your system.
 Some common examples of fault in our systems include:
@@ -39,9 +39,7 @@ Systems affected in the presence of faults:
 
 <p align="center"><img src="img/fault.png" width="480"></p>
 
-#### Failure
-
-Failure is inability of the system to perform its intended job. Failure
+Whereas, Failure is inability of the system to perform its intended job. Failure
 means loss of uptime and availability on systems.
 
 Faults if not contained from propogating can lead to failures.
@@ -50,19 +48,19 @@ Systems failing when fault turned into failure:
 
 <p align="center"><img src="img/failure.png" width="480"></p>
 
-So we can quite confidently say that, `Resiliency is all about preventing faults turning into failures`
+`Resiliency is all about preventing faults turning into failures`
 
 ### Why do we care about resiliency in our systems ?
 
-Resiliency of your system is directly proportional to your uptime and
-availability. The more resilient your systems are the more available you
-are to serve your users.
+Resiliency of a system is directly proportional to its uptime and
+availability. The more resilient the systems are the more available it
+is to serve users.
 
 Failing to be resilient can affect companies in many ways. For GO-JEK,
 going down can have this impact:
 
 1. It can lead to financial losses for the company
-2. Losing customers to your competitors
+2. Losing customers to competitors
 3. Affecting livelihood of drivers 
 4. Affecting livelihood of customers
 
@@ -94,17 +92,17 @@ going ahead:
 
  The most resilient piece of code you ever write will be the code you
  never wrote. The lesser the code you write, lower are the reasons for
- your code to break. 
+ it to break. 
 
 ### Pattern[1] = Timeouts
 
 _Stop waiting for an answer_
 
-The default Go http client has no HTTP timeout. This causes your
-application to leak goroutines (Because for every request Golang spawns
+The default Go http client has no HTTP timeout. This causes 
+application to leak goroutines (to handle every request Golang spawns
 a go-routine). When you have a slow/failed downstream service, the go
 routine waits forever for the reply from downstream service. To avoid this
-problem, it is important that we add timeouts for every http integration
+problem, it is important that we add timeouts for every integration
 point in our application.
 
 For example: you can set timeout using
@@ -123,7 +121,7 @@ Timeouts in application can help in following ways:
 #### Preventing cascading failures 
 
 Cascading failures are failures which propogate very quickly to other
-parts of your system. These are very bad if unmanaged. 
+parts of the system. These are very bad if unmanaged. 
 
 Timeouts help us prevent these failures by failing fast. When downstream
 services fail or are slower (violating their SLA), instead of waiting for
