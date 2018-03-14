@@ -302,12 +302,12 @@ Army](https://github.com/Netflix/SimianArmy) suite of applications.
 
 ### In Conclusion: 
 
-Though following some of these patterns will help you acheive resiliency,
+Though following some of these patterns will help us acheive resiliency,
 these are no silver bullet. Systems do fail, and the sad truth is we have
 to deal with these failures. These patterns if excercised can help us
-achieve significant uptime on services. 
+achieve significant uptime/availability on our services. 
 
-We have to `Design our systems for failure`.
+To be resilient, we have to `Design our systems for failure`.
 
 #### References:
 
