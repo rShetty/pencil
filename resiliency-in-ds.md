@@ -85,7 +85,7 @@ of the patterns while building distributed systems can help us acheive
 high uptime across our services. We will discuss some of these patterns
 going ahead:
 
-### Pattern 0: nocode
+### Pattern[0] = nocode
 
 `The best way to write reliable and secure applications is write no code
  at all - Write Nothing and Deploy nowhere` - Kelsey Hightower
@@ -96,7 +96,7 @@ going ahead:
  never wrote. The lesser the code you write, lower are the reasons for
  your code to break. 
 
-### Pattern 1: Timeouts
+### Pattern[1] = Timeouts
 
 _Stop waiting for an answer_
 
@@ -143,7 +143,7 @@ systems problem your problem.
 Timeouts must be based on the SLAs provided by your dependencies. For
 example, this could be around the dependency's 99.9th percentile. 
 
-### Pattern 2: Retries
+### Pattern[2] = Retries
 
 _If you fail once, try again_
 
@@ -194,7 +194,7 @@ For example: In GO-JEK, non-idempotent operations in the booking creation
 flow can lead to multiple bookings being created for the same user as well
 as same driver being allocated to multiple bookings.
 
-### Pattern 3: Fallbacks
+### Pattern[3] = Fallbacks
 
 _Degrade gracefully_
 
@@ -226,7 +226,7 @@ wherein the whole of booking creation used to fail.
 
 It is important to think of fallbacks at all of your integration points.
 
-### Pattern 4: Circuit Breakers
+### Pattern [4] = Circuit Breakers
 
 _Trip the circuit to protect your dependencies_
 
@@ -282,7 +282,7 @@ which helps you visualise state transitions.
 
 <p align="center"><img src="img/dashboard.png" width="480"></p>
 
-### Pattern 5: Resiliency Testing
+### Pattern[5] = Resiliency Testing
 
 _Test to Break_
 
