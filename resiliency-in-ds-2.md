@@ -15,7 +15,7 @@ If you have not read Part 1 of this blog series. Please do so [here]()
 - Bulkheading in connection pooling 
 - Importance
 
-8) Queuing to decouple tasks from consumers
+) Queuing to decouple tasks from consumers
 - What is Queuing ?
 - How queuing is helpful decoupling from external services ?
 - BTS
@@ -27,7 +27,7 @@ If you have not read Part 1 of this blog series. Please do so [here]()
 - How monitoring can help prevent faults turning into failures
 
 10) Canary Deployments 
-- Gradual rollout of features
-- Of algorithms
-- Deployments to only part of the service
+- What are canary deployments ?
+- Gradual rollout of features/algorithms
+- Canarying
 - Advantages
