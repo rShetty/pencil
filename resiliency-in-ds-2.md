@@ -6,11 +6,31 @@ In this article we will continue to discuss and explore more patterns in bringin
 
 ### Pattern[6] = Ratelimiting and Throttling
 
-- What is rate limiting ?
-- Importance of throtlling requests to external services (Maps API -> Google Service)
-- Importance of rate limiting for security purposes (Login)
-- Ratelimit algorithms (Leaky bucket)
-- How it is useful ?
+Ratelimiting/Throttling is about allowing only certain number of requests(n) in some time (t).
+This could be applied to requests which are coming into your system, ratelimiting access to your API,
+or for the requests which you are leaving your system by making call to third party services.
+
+Ratelimiting/Throttling is an important resiliency pattern to protect systems from scripted attacks or sudden burst in traffic. 
+It helps limit requests coming into your system in-turn allowing breathing space for services to recover from faults.
+
+OTP Login:
+We ratelimit request to OTP login into our mobile application to say 'n' attempts in some time 't'. Thus preventing a scripted attacker/a malicious user not allowing retrying logins more than required.
+
+Promotions:
+It is important to ratelimit redeeming of promotions so that sudden surge in traffic due to some good marketing by your marketing team bringing down your whole system affecting critical flows.
+
+It is also important to throttle requests which are going out of your system.
+
+Maps Service:
+We use Google maps API for estimating distance between rider and driver, estimating price, mapping a route between driver and rider etc. We have certain limit(Quota) on the number of requests (QPS) which are allowed to be made 
+to google in some time 't'. It is important for us to keep the requests going out to google below that limit so that we don't get blocked by google from accessing the above mentioned services.
+All the calls to google at GO-JEK go through Maps service which makes sure that requests to google are throttled at an appropriate level thus preventing catastrophic failures within other systems.
+
+SMS Providers:
+We use multiple SMS providers for sending login OTP's, Marketing messages etc to our customers. We do have a Quota of requests allowed to be made to them (SMS providers) at any point in time (t). We heavily use throttling here to 
+make sure we don't get blocked by our SMS providers thus preventing failures of customers in logging into our application.
+
+We use Leaky Bucket algorithm at most places for ratelimiting/throttling requests.
 
 ### Pattern[7] = Bulkheading
 
