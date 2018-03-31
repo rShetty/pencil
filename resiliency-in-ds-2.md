@@ -17,7 +17,7 @@ It helps limit requests coming into your system in-turn allowing services to per
 
 At GO-JEK, this pattern is used at multiple places and for varied reasons, lets discuss few of those:
 
-``` Ratelimiting requests coming into your system``
+``` Ratelimiting requests coming into your system```
 
 #### OTP Login
 We ratelimit requests to OTP login from our mobile application to say 'n' attempts in some time 't'. 
