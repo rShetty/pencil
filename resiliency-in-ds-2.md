@@ -48,10 +48,31 @@ We use Leaky Bucket algorithm at most places for ratelimiting/throttling request
 
 ## Pattern[7] = Bulkheading
 
-- What is bulkheading ?
-- Bulkheading in services to provide failure isolation (Kong example)
-- Bulkheading in connection pooling 
-- Importance
+```Bulkheading is the pattern of isolating elements into pools so that failure of one does not affect another```
+
+The name `Bulkhead` comes from sectioned partitions in a ship, wherein if a parition is damaged/compromised=, only the damaged region fills with water and prevents from the whole ship sinking.
+In a similar way, you can prevent failure in one part of your distributed system affecting and bringing down others.
+
+Bulkhead pattern can be applied at multiple levels in a system.
+
+Lets start at a higher level from an architecture point of view:
+
+#### Physical redundancies
+
+Bulkheading here is about providing physical redundancy for the same piece of software for different requirements/flows.
+For ex: At GO-JEK, physical redundancy is provided at the Auth proxy, separating driver apis from customer apis. 
+This bulkheading prevents failures in customer apis affecting and causing problems on the driver side.
+
+It can also be envisoned at the connection pooling level:
+
+Consider you have 2 downstream services B and C for a service A. Request handling threads in A process the requests to downstream services B and C.
+When we have a common connection pooling config, problems in C can cause request handling threads to be blocked on A utilising all the resources, preventing requests depending on B to be served/fulfilled.
+Isolating connection pooling config to B and C, can help prevent faults/slowdown in one dependent service affecting the whole system.
+
+Hystrix implementation also provides Max concurrent requests per backend. Assume we have 25 request handling threads, and we have a limit of 10 on requests to C, which means at most 10 requests can hang,
+when C has a slowdown. The other 15 can still be used to process requests for B.
+
+Bulkheading thus provides failure isolation across your services, hence building resiliency.
 
 ## Pattern[8] = Queuing to decouple tasks from consumers
 
