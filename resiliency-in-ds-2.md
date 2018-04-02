@@ -65,6 +65,8 @@ This bulkheading prevents failures in customer apis affecting and causing proble
 
 It can also be envisoned at the connection pooling level:
 
+#### Connection pooling
+
 Consider you have 2 downstream services B and C for a service A. Request handling threads in A process the requests to downstream services B and C.
 When we have a common connection pooling config, problems in C can cause request handling threads to be blocked on A utilising all the resources, preventing requests depending on B to be served/fulfilled.
 Isolating connection pooling config to B and C, can help prevent faults/slowdown in one dependent service affecting the whole system.
