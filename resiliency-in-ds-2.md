@@ -121,10 +121,13 @@ before hand and take corrective measures.
 
 Monitoring with alerting according to me can help in 2 ways:
 
-First of all, it notifies you of potential faults in your system, helping you recover from it before it causes failure in all of your system. (Proactive)
-Secondly, it can help diagnose the issue and pinpoint the root cause to help recover your systems from failure(MTTR - Mean time to recovery). (Active)
+- It notifies you of potential faults in your system, helping you recover from it before it causes failure in all of your system. (Proactive)
+- It can help diagnose the issue and pinpoint the root cause to help recover your systems from failure(MTTR - Mean time to recovery). (Active)
 
-## Pattern[10] = Canarying
+## Pattern[10] = Canary releases
+
+Last but not the least for this post comes Canary releases.
+
 
 - What are canary deployments ?
 - Gradual rollout of features/algorithms
