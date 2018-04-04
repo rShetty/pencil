@@ -109,10 +109,20 @@ SMS Notification service is the service which interfaces with various SMS provid
 
 To decouple ourselves from failures on our SMS providers, we use queuing to deliver messages. We retry SMS with a different provider when our primary provider fails to meet a certain SLA for delivering SMS's.
 
-## Pattern[9] = Monitoring/alerting (Observability?)
+## Pattern[9] = Monitoring/alerting
 
-- Monitoring/alerting setup in GOJEK
-- How monitoring can help prevent faults turning into failures
+```Monitoring is about measuring some metric over a period of time. And alerting is about getting notification when some metric violates its threshold```
+
+Monitoring can help you measure your current state/health of your system as well as over historic periods. It becomes extremely crucial for resiliency to know when faults have made their way into our systems.
+For example: Without monitoring/alerting you might not be able to detect a memory leak in your production application before hand and fix it, before it actually crashes and impact users.
+
+At GO-JEK we collect various kinds of metrics which includes system metrics, app metrics, business metrics etc. Also alerts with thresholds are set for various kinds of metrics, so that when a fault happens, we know
+before hand and take corrective measures.
+
+Monitoring with alerting according to me can help in 2 ways:
+
+First of all, it notifies you of potential faults in your system, helping you recover from it before it causes failure in all of your system. (Proactive)
+Secondly, it can help diagnose the issue and pinpoint the root cause to help recover your systems from failure(MTTR - Mean time to recovery). (Active)
 
 ## Pattern[10] = Canarying
 
