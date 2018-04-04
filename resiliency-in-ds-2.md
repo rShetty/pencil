@@ -142,7 +142,7 @@ Usually this is coupled with monitoring for failures, latencies etc on the node.
 Even new app rollouts go through this phase of rolling out to small set of users which is again coupled with gathering metrics of usage, collecing feedback on the new features etc. Only after the team is confident enough of the impact
 of the new version on the end users do they go with full release.
 
-Canary releases help you avoid large scale risk to bring in new features to end users with higher confidence.
+Canary releases help you avoid large scale risk to bring in new features to end users with higher confidence, in-turn helping resiliency of systems.
 
 All the above patterns, can help us with maintaining stability across our systems. The key being decoupling services. 
 
