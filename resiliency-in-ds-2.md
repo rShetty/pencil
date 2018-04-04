@@ -126,10 +126,27 @@ Monitoring with alerting according to me can help in 2 ways:
 
 ## Pattern[10] = Canary releases
 
-Last but not the least for this post comes Canary releases.
+Last but not the least for this post comes Canary releases. More [here](https://martinfowler.com/bliki/CanaryRelease.html)
 
+```It is a way to release a certain new feature/version of a software to only a certain set of people in order reduce risk of failures```
 
-- What are canary deployments ?
-- Gradual rollout of features/algorithms
-- Canarying
-- Advantages
+Canary releases at GO-JEK are done at various places:
+
+#### Backend Deployments
+
+Every deployment on backend involving critical changes (like algorithmic change to find a driver) goes through a canary release. Wherein the new version of the software is deployed only to a single node or selected set of nodes.
+Usually this is coupled with monitoring for failures, latencies etc on the node. Only after monitoring the system for a particular period of time, is the new version of software released to all users.
+
+#### Mobile releases
+
+Even new app rollouts go through this phase of rolling out to small set of users which is again coupled with gathering metrics of usage, collecing feedback on the new features etc. Only after the team is confident enough of the impact
+of the new version on the end users do they go with full release.
+
+Canary releases help you avoid large scale risk to bring in new features to end users with higher confidence.
+
+All the above patterns, can help us with maintaining stability across our systems. The key being decoupling services. 
+
+```The more coupled your services are, the more they are together in failures```
+
+In conclusion, Failures will happen, we need to design systems to be resilient against these failures.
+
