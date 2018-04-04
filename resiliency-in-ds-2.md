@@ -78,11 +78,36 @@ Bulkheading thus provides failure isolation across your services, hence building
 
 ## Pattern[8] = Queuing to decouple tasks from consumers
 
-- What is Queuing ?
-- How queuing is helpful decoupling from external services ?
-- BTS
-- SMS/PNS
-- GOPAY
+Queuing is the process of buffering messages in a queue so as to decouple producers of messages from consumers.
+
+Queuing plays an important role in decoupling multiple services. It also can act as a buffer which helps smoothen out intermittent heavy loads which can cause service to fail.
+It helps in increasing availability as well as scalability of your system.
+
+A typical queuing architecture looks like this:
+
+<< Figure >>
+
+At GO-JEK, we heavily use queuing pattern to process some of the flows asynchronously without affecting our customers.
+
+#### BTS (Booking Termination Service)
+
+This service plays an important role in terminating all bookings in GO-JEK. There are bunch of activities you need to complete to make sure a booking has completed.
+For example, If customer has booked a ride using GOPAY, you need to debit customer balance, and credit driver balance, update a service to release driver back to the pool of available drivers,
+Mark the state of booking as completed, record history of this transaction, reward driver with points and much more.
+
+Now more the tasks you have to do, more the failure modes and ways in which a service or an api call can fail. It is potentially a very bad experience if you asked your customer to wait until you cleanup
+various states in your system. God forbid, if there is a failure in some system, both your customer and driver are stuck from completing the transaction and getting on with their own livelihood.
+
+In this case, we queue the request for completion of booking and process all the tasks required to complete this booking asynchronously from the main booking flow.
+
+Queuing decouples this flow to provide much more resiliency in the whole architecture, wherein you eventually tend towards this state, potentially with retries at places.
+
+#### SMS (Notification Service)
+
+We heavily use SMS for communicating with our customers/drivers/merchants. The major chunk of which is for OTP login into GOJEK application. We use multiple SMS providers to be resilient against failures on a single SMS provider.
+SMS Notification service is the service which interfaces with various SMS providers(external to GOJEK) to help deliver SMS's to our customers/drivers/merchants.
+
+To decouple ourselves from failures on our SMS providers, we use queuing to deliver messages. We retry SMS with a different provider when our primary provider fails to meet a certain SLA for delivering SMS's.
 
 ## Pattern[9] = Monitoring/alerting (Observability?)
 
