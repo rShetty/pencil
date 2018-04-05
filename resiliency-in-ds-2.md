@@ -1,7 +1,7 @@
 # Resiliency in Distributed Systems - Part 2
 
 This is part 2 in discussions on Resiliency in Distributed systems, if you have not read Part 1 of this blog series. 
-Please do so [here](), I will wait ...
+Please do so [here](https://github.com/rShetty/pencil/blob/master/resiliency-in-ds.md), I will wait ...
 
 In this article we will continue to discuss and explore more patterns in bringing resiliency/stability in complex distributed systems.
 
