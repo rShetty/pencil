@@ -1,7 +1,7 @@
 # Resiliency in Distributed Systems - Part 2
 
 
-This is part 2 in discussions on Resiliency in Distributed systems, if you have not read Part 1 of this blog series, do so here , I will wait …
+This is part 2 in discussions on Resiliency in Distributed systems, if you have not read Part 1 of this blog series, do so [here](https://blog.gojekengineering.com/resiliency-in-distributed-systems-efd30f74baf4), I will wait …
 
 In this article, we will continue to discuss and explore more patterns in bringing resiliency/stability in complex distributed systems.
 
@@ -74,12 +74,13 @@ Bulkheading done in this way prevents failures in customer APIs affecting and ca
 
 At GO-JEK, we limit the number of outgoing HTTP connections which a server can make. The number of allowed connections is considered a connection pool. 
 
-<<Figure>>
+<< Figure >>
 
 Consider ‘A’ supports 2 API’s API1 and API2. API1 requires a request to ‘B’ and API2 requires a request to ‘C’. When we have a common connection pool, problems in ‘C’ can cause request handling threads to be blocked on ‘A’ utilizing all the resources of ‘A’, preventing requests meant for ‘B’ to be served/fulfilled. This means failures on API1 causes API2 to also fail. Creating separate connection pools to ‘B’ and ‘C’ can help prevent this. This is an example of categorized  resource allocation:
 
-Hystrix provides max concurrent requests setting  per backend. If we have 25 request handling threads, we can limit 10 connections to ‘C’, which means at most 10 connections can hang when ‘C’ has a slowdown/failiure. 
+**Hystrix** provides max concurrent requests setting  per backend. If we have 25 request handling threads, we can limit 10 connections to ‘C’, which means at most 10 connections can hang when ‘C’ has a slowdown/failure.
 The other 15 can still be used to process requests for ‘B’.
+
 Bulkheading thus provides failure isolation across your services, hence building resiliency.
 
 ## Pattern[8] = Queuing
