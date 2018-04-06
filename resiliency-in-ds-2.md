@@ -117,7 +117,7 @@ Queuing decouples booking flow to provide much more resilience in the whole arch
 
 ### Case 2: SMS (Notification Service)
 
-<<Figure>>
+<< Figure >>
 
 We heavily use SMS for communicating with our customers/drivers/merchants. To make our systems resilient against SMS provider failure, we integrate with multiple SMS providers. 
 To decouple ourselves from failures on our SMS providers, we use queuing to deliver messages. Messages in the queue are removed when they are successfully sent through our SMS provider. 
