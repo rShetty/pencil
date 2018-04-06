@@ -9,7 +9,6 @@ In this article, we will continue to discuss and explore more patterns in bringi
 
 ```Ratelimiting/Throttling is only allowing a certain number of requests in fixed time```
 
-
 Rate-limiting could be applied to requests which are coming into your system (rate-limiting access to your APIs),
 or for the requests which are leaving your system (when making calls to external party services)
 
@@ -48,6 +47,8 @@ Thus helping critical flows to not break.
 We use Google maps API for estimating the distance between rider and driver, estimating price, mapping a route between driver and rider etc. 
 We have a certain limit(Quota) on the number of requests (QPS - Queries per second) which are allowed to be made to Google in a fixed period of time. It is important for
 us to keep the requests going out from our system to google below that limit so that we don't get blocked by Google from accessing the above-mentioned services.
+
+<< Figure >>
 
 At GO-JEK, all the calls to google at GO-JEK go through Maps service which makes sure that requests to Google are throttled at an appropriate level before making external calls thus preventing catastrophic failures within our other systems.
 
