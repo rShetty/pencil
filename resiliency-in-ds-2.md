@@ -1,160 +1,168 @@
 # Resiliency in Distributed Systems - Part 2
 
-This is part 2 in discussions on Resiliency in Distributed systems, if you have not read Part 1 of this blog series. 
-[Please do so here](https://github.com/rShetty/pencil/blob/master/resiliency-in-ds.md), I will wait ...
+
+This is part 2 in discussions on Resiliency in Distributed systems, if you have not read Part 1 of this blog series, do so here , I will wait …
 
 In this article, we will continue to discuss and explore more patterns in bringing resiliency/stability in complex distributed systems.
 
-## Pattern[6] = Ratelimiting and Throttling
+## Pattern[6] = Rate-limiting and Throttling
 
-```Ratelimiting/Throttling is only allowing a certain number of requests in fixed time```
+```Rate-limiting/Throttling is only processing a certain number of requests in a fixed period of time and gracefully handling others```
 
-Rate-limiting could be applied to requests which are coming into your system (rate-limiting access to your APIs),
-or for the requests which are leaving your system (when making calls to external party services)
+Rate-limiting could be applied to requests which are coming into your system (rate-limiting access to your APIs), or for the requests which are leaving your system (when making calls to external party services)
 
-We use Leaky Bucket algorithm(https://en.wikipedia.org/wiki/Leaky_bucket) at most places for rate-limiting/throttling requests.
+We use Leaky Bucket algorithm at most places for rate-limiting/throttling requests.
+<< Figure >>
 
-Rate-limiting/Throttling is an important resiliency pattern which can help protect systems in multiple ways: 
-1) scripted attacks to your system
-2) sudden bursts in traffic
-3) protecting your integrations with third party external services
+Rate-limiting/Throttling can help protect systems in many scenarios: 
+- scripted attacks to your system
+- sudden bursts in traffic
+- protecting your integration with third party external services
 
 Usually when a rate-limit kicks in requests exceeding threshold are dropped and sent back a standard 429(Too many requests) response.
+At GO-JEK, this pattern is used at multiple places and for varied reasons, let’s discuss few of those:
 
-At GO-JEK, this pattern is used at multiple places and for varied reasons, let's discuss few of those:
+### Rate-limiting incoming requests
 
-### Ratelimiting requests coming into your system
+#### Case 1: OTP Login
 
-#### OTP Login
-We rate-limit requests to OTP login from our mobile application to say 'n' attempts in some time 't'. 
-This means if the rate-limit configuration is set to allow 3 login request attempts from a customer in 15 minutes, customer gets 3 chances for logging in for that 15 minute window.
+We rate-limit requests to OTP (One time password) login from our mobile application. This rate-limit is per-user.
+Users get only a fixed number of chances to log in for a fixed time window.
 This helps prevent a scripted attacker/a malicious user retrying logins more than necessary.
 
 This approach helps in following ways:
-- Prevent attackers from gaming the login system by continuosly retrying login with different OTP's
-- Saves cost on SMS/call
+ - Prevent attackers from brute-forcing the login system by continuosly retrying login with different OTP’s
+ - Saves cost on SMS/call
 
-#### Promotions Platform
-Promotions platform is responsible for processing promotional codes which are sent to GO-JEK users on various services.
+#### Case 2: Promotions Platform
 
-At times during promotions, we see a sudden burst in traffic on our promotions platform. This sudden burst could potentially affect services involved in fulfilling this request from not performing at their peak.
-Rate-limiting requests (dropping execess ones) coming to promotions platform can help promotions service as well as the dependent services to work in normal mode.
-Thus helping critical flows to not break.
+Promotions platform is responsible for processing promotional codes which are sent to GO-JEK users for various services.
+At times during promotions, we see a sudden burst in traffic. This sudden burst could crash services or prevent them from performing at their peak.
+Rate-limiting requests, dropping excess ones or queuing them, can help promotions service as well as the dependent services to work normally. 
+Thus protecting critical flows from failure.
 
-### Throttling requests going out of the system
+### Throttling outgoing requests
 
-#### Maps Service:
-We use Google maps API for estimating the distance between rider and driver, estimating price, mapping a route between driver and rider etc. 
-We have a certain limit(Quota) on the number of requests (QPS - Queries per second) which are allowed to be made to Google in a fixed period of time. It is important for
-us to keep the requests going out from our system to google below that limit so that we don't get blocked by Google from accessing the above-mentioned services.
+#### Case 1: Maps Service
+
+We use Google maps API for estimating the distance between rider and driver, estimating price, mapping a route between driver and rider etc. 
+We have a certain limit(Quota) on the number of requests (QPS - Queries per second) which are allowed to be made to Google in a fixed period of time. 
+It is important that we adhere to this limit so that we don’t get blocked by Google.
 
 << Figure >>
 
-At GO-JEK, all the calls to google at GO-JEK go through Maps service which makes sure that requests to Google are throttled at an appropriate level before making external calls thus preventing catastrophic failures within our other systems.
-
-#### SMS Providers:
-We use multiple SMS providers for sending login OTP's, Marketing messages etc to our users. We do have a Quota of requests allowed to be made to the SMS providers in a fixed time period. We heavily use throttling here to make sure we don't get blocked by our SMS providers.
+At GO-JEK, all the calls to Google go through a proxy service which makes sure that we do not exceed the limit set by Google by throttling requests that fall outside the limit.
 
 ## Pattern[7] = Bulkheading
 
-```Bulkheading is the pattern of isolating elements into pools so that failure of one does not affect another```
+```Bulkheading is isolating elements into pools so that failure of one does not affect another```
 
-The name `Bulkhead` comes from sectioned partitions in a ship, wherein if a partition is damaged/compromised=, only the damaged region fills with water and prevents the whole ship sinking.
-In a similar way, you can prevent failure in one part of your distributed system affecting and bringing down others.
+The name `Bulkhead` comes from sectioned partitions in a ship, wherein if a partition is damaged/compromised, only the damaged region fills with water and prevents the whole ship from sinking.
 
-Bulkhead pattern can be applied at multiple levels in a system.
+In a similar way, you can prevent failure in one part of your distributed system from affecting and bringing down other parts.
+Bulkhead pattern can be applied at multiple ways in a system.
 
-Let's start at a higher level from an architecture point of view:
+### Physical redundancies
+Bulkheading here is about keeping components of the system physically separated. This could mean running on  separate hardware or different VM’s etc.
 
-#### Physical redundancies
+For example: At GO-JEK, We have driver and customer API’s physically separated on different clusters. 
+Bulkheading done in this way prevents failures in customer APIs affecting and causing problems on the driver side.
 
-Bulkheading here is about providing physical redundancy for the same piece of software for different requirements/flows.
-For example: At GO-JEK, physical redundancy is provided at the Auth proxy, separating driver APIs from customer APIs. 
-This bulkheading prevents failures in customer APIs affecting and causing problems on the driver side.
+### Categorized Resource Allocation (CRA)
 
-It can also be envisioned at the connection pooling level:
+```CRA is about splitting resources of a system into various buckets instead of a common pool```
 
-#### Connection Pooling
+At GO-JEK, we limit the number of outgoing HTTP connections which a server can make. The number of allowed connections is considered a connection pool. 
 
-Consider you have 2 downstream services 'B' and 'C' for a service 'A'. Request handling threads in A process the requests to downstream services 'B' and 'C'.
-When we have a common connection pooling config, problems in 'C' can cause request handling threads to be blocked on 'A' utilizing all the resources, preventing requests depending on B to be served/fulfilled.
-Isolating connection pooling config to 'B' and 'C' can help prevent faults/slowdown in one dependent service affecting the whole system.
+<<Figure>>
 
-Hystrix implementation also provides Max concurrent requests per backend. Assume we have 25 request handling threads, and we have a limit of 10 on requests to 'C', which means at most 10 requests can hang
-when 'C' has a slowdown. The other 15 can still be used to process requests for 'B'.
+Consider ‘A’ supports 2 API’s API1 and API2. API1 requires a request to ‘B’ and API2 requires a request to ‘C’. When we have a common connection pool, problems in ‘C’ can cause request handling threads to be blocked on ‘A’ utilizing all the resources of ‘A’, preventing requests meant for ‘B’ to be served/fulfilled. This means failures on API1 causes API2 to also fail. Creating separate connection pools to ‘B’ and ‘C’ can help prevent this. This is an example of categorized  resource allocation:
 
+Hystrix provides max concurrent requests setting  per backend. If we have 25 request handling threads, we can limit 10 connections to ‘C’, which means at most 10 connections can hang when ‘C’ has a slowdown/failiure. 
+The other 15 can still be used to process requests for ‘B’.
 Bulkheading thus provides failure isolation across your services, hence building resiliency.
 
-## Pattern[8] = Queuing to decouple tasks from consumers
+## Pattern[8] = Queuing
 
-Queuing is the process of buffering messages in a queue so as to decouple producers of messages from consumers.
+```Queuing is buffering of messages in a queue for later dispatch to consumers allowing producers to be decoupled from consumers```
 
-Queuing plays an important role in decoupling multiple services. It also can act as a buffer which helps smoothen out intermittent heavy loads which can cause service to fail.
-It helps in increasing availability as well as scalability of your system.
+Queuing brings in resiliency by:
+
+- Decoupling Producers from consumers
+- Smoothen out bursts of traffic by buffering
+- Retries on intermittent failures
 
 A typical queuing architecture looks like this:
 
 << Figure >>
 
-At GO-JEK, we heavily use queuing pattern to process some of the flows asynchronously without affecting our customers.
+At GO-JEK, we heavily use queuing to process asynchronous flows for our customers. Queuing can introduce latencies and so using it in a synchronous context should be carefully designed.
 
-#### BTS (Booking Termination Service)
+### Case 1: BTS (Booking Termination Service)
 
-This service plays an important role in terminating all bookings in GO-JEK. There are a bunch of activities you need to complete to make sure a booking has completed.
-For example, If a customer has booked a ride using GOPAY, you need to debit customer balance, and credit driver balance, update a service to release driver back to the pool of available drivers,
-Mark the state of booking as completed, record history of this transaction, reward driver with points and much more.
+This service plays an important role in terminating all bookings at GO-JEK. There are a bunch of activities that need to complete before a booking is considered completed.
+If a customer has booked a ride using GOPAY, you need to
 
-Now more the tasks you have to do, more the failure modes and ways in which a service or an API call can fail. It is potentially a very bad experience if you asked your customer to wait until you clean up
-various states in your system. God forbid, if there is a failure in some system, both your customer and driver are stuck from completing the transaction and getting on with their own livelihood.
+- Debit customer balance
+- Credit driver balance 
+- Update a service to release driver back to the free pool
+- Mark the state of booking as completed
+- Record the history of this transaction
+- Reward driver with points
 
-In this case, we queue the request for completion of booking and process all the tasks required to complete this booking asynchronously from the main booking flow.
+The more the tasks you have to do, the more the failure modes and the more the ways in which a service or an API call can fail. All of the above tasks can be done asynchronously without asking customer or driver to wait. 
+Without a queuing solution. if there is a failure in some system, both your customers and drivers are stuck waiting for their transactions to complete. Queuing can also help retry requests once the failure has been rectified.
+Queuing decouples booking flow to provide much more resilience in the whole architecture.
 
-Queuing decouples this flow to provide much more resiliency in the whole architecture, wherein you eventually tend towards this state, potentially with retries at places.
+### Case 2: SMS (Notification Service)
 
-#### SMS (Notification Service)
+<<Figure>>
 
-We heavily use SMS for communicating with our customers/drivers/merchants. The major chunk of which is for OTP login into GOJEK application. We use multiple SMS providers to be resilient against failures on a single SMS provider.
-SMS Notification service is the service which interfaces with various SMS providers(external to GOJEK) to help deliver SMS to our customers/drivers/merchants.
+We heavily use SMS for communicating with our customers/drivers/merchants. To make our systems resilient against SMS provider failure, we integrate with multiple SMS providers. 
+To decouple ourselves from failures on our SMS providers, we use queuing to deliver messages. Messages in the queue are removed when they are successfully sent through our SMS provider. 
+We retry SMS with a different provider when our primary provider fails to meet a certain SLA for delivering SMS.
 
-To decouple ourselves from failures on our SMS providers, we use queuing to deliver messages. We retry SMS with a different provider when our primary provider fails to meet a certain SLA for delivering SMS.
+## Pattern[9] = Monitoring and alerting
 
-## Pattern[9] = Monitoring/alerting
+```Monitoring is measuring some metric over a period of time```
 
-```Monitoring is about measuring some metric over a period of time. And alerting is about getting a notification when some metric violates its threshold```
+```Alerting is sending a notification when some metric violates its threshold```
 
-Monitoring can help you measure the current state/health of your system as well as over historical periods. It becomes extremely crucial for resiliency to know when faults have made their way into our systems.
-For example: Without monitoring/alerting you might not be able to detect a memory leak in your production application beforehand and fix it before it actually crashes and impact users.
+Resiliency does not mean that your systems will never fail rather it means that it recovers quickly and gracefully from faults.
 
-At GO-JEK we collect various kinds of metrics which includes system metrics, app metrics, business metrics etc. Also, alerts with thresholds are set for various kinds of metrics, so that when a fault happens, we know
-beforehand and take corrective measures.
+Monitoring and alerting can help you measure the current state/health of your system so that you are alerted of the faults in your system as quickly as possible. 
+This can prevent faults turning into failures.
 
-Monitoring with alerting according to me can help in 2 ways:
+For example: Without monitoring/alerting you might not be able to detect a memory leak in your production application before it crashes.
+At GO-JEK, we collect various kinds of metrics which includes system metrics, app metrics, business metrics etc. Also, alerts with thresholds are set for various kinds of metrics, so that when a fault happens, we know beforehand and take corrective measures.
 
-- It notifies you of potential faults in your system, helping you recover from it before it causes failure in all of your system. (Proactive)
-- It can help diagnose the issue and pinpoint the root cause to help recover your systems from failure(MTTR - Mean time to recovery). (Active)
+Monitoring with alerting can help in 2 ways:
+- It notifies you of potential faults in your system, helping you recover from it before it causes failure in all of your system (Uptime)(Proactive)
+- It can help diagnose the issue and pinpoint the root cause to help recover your systems from failure(MTTR — Mean time to recovery)(Active)
 
-## Pattern[10] = Canary releases
+## Pattern[10] = Canary releases
 
-Last but not the least for this post comes Canary releases. More [here](https://martinfowler.com/bliki/CanaryRelease.html)
+```It is releasing a new feature/version of a software to only a certain set of users in order to reduce the risk of failures```
 
-```It is a way to release a certain new feature/version of a software to only a certain set of people in order reduce the risk of failures```
+More about canary release [here](https://martinfowler.com/bliki/CanaryRelease.html)
 
 Canary releases at GO-JEK are done at various places:
 
-#### Backend Deployments
+### Case 1: Back-end Deployments
+Every deployment on backend involving critical changes (like the algorithmic change to find a driver) goes through a canary release. Wherein the new version of the software is deployed only to a single node or to a selected set of nodes.
+Usually, this is coupled with monitoring for failures, latencies etc on that node. Only after monitoring the system for a particular period of time, is the new version of the software released to all users.
 
-Every deployment on backend involving critical changes (like the algorithmic change to find a driver) goes through a canary release. Wherein the new version of the software is deployed only to a single node or selected set of nodes.
-Usually, this is coupled with monitoring for failures, latencies etc on the node. Only after monitoring the system for a particular period of time, is the new version of the software released to all users.
+### Case 2: Mobile releases
+Even new app rollouts go through this phase of rolling out to a small set of users which is again coupled with gathering metrics of usage, crashes, collecting feedback on the new features etc.
+Only when the team is confident about the new version do they go with the full release.
+Canary releases help you avoid risk of failures on new version/feature releases, in-turn helping resiliency of systems.
 
-#### Mobile releases
+## Conclusion
 
-Even new app rollouts go through this phase of rolling out to a small set of users which is again coupled with gathering metrics of usage, collecting feedback on the new features etc. Only after the team is confident enough of the impact of the new version on the end users do they go with the full release.
+All the above patterns can help us maintain stability across our systems. 
 
-Canary releases help you avoid large-scale risk to bring in new features to end users with higher confidence, in-turn helping resiliency of systems.
+If there is one thing you take home from these patterns it should be …
 
-All the above patterns can help us with maintaining stability across our systems. The key being decoupling services. 
-
-```The more coupled your services are, the more they are together in failures```
+```The more coupled your services are, the more they are together in failures```
 
 In conclusion, Failures will happen, we need to design systems to be resilient against these failures.
-
